@@ -6,20 +6,25 @@ source("utils.R")
 library(pheatmap)
 
 CLUSTPARAM <- c("ward.D2", "euclidean")
+COEF_CUT <- 0.00125
 CD4_CUT_DISC <- 0.25 #fraction
 CD4_CUT_APPL <- 50 #percent
 
 ## LASSO Coefficients & Additinoal Filtering
 coefs <- read.csv("results/lasso_model_coefs.csv", na.strings=STRNA)[-1 , ]
-coefs <- subset(coefs, abs(Coef) > 0.00125)
-coefs$Direction <- ifelse(coefs$Coef > 0, "Positive", "Negative")
-table(coefs$Direction)
-# write.csv(coefs, "results/lasso_filtered.csv", row.names = FALSE, quote=FALSE) #supp table online
+coefs$Keep <- ifelse(abs(coefs$Coef) > COEF_CUT, "Yes", "No")
 
-ggplot(aes(reorder(Gene, Coef), Coef), data=coefs[-1, ]) +
+ggplot(aes(reorder(Gene, Coef), Coef, fill=Keep), data=coefs[-1, ]) +
   geom_bar(stat="identity") +
   labs(x="Gene", y="LASSO Coefficient") +
   THEME_BAR
+
+## Subset for downstream analyses & GOBP:
+coefs <- subset(coefs, Keep=="Yes")
+coefs$Keep <- NULL
+coefs$Direction <- ifelse(coefs$Coef > 0, "Positive", "Negative")
+table(coefs$Direction)
+# write.csv(coefs, "results/lasso_filtered.csv", row.names = FALSE, quote=FALSE) #supp table online
 
 # -------------------------- Visualization on Discovery Set --------------------------
 ## Grady Dataset - no need mutual subsetting for visualization

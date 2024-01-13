@@ -7,7 +7,6 @@ library(glmnet)
 library(matrixStats)
 
 COMMON_GENES <- as.character(read.table("results/universe.txt")$V1)
-FILTER_ADDL <- 0.0015 #additional filter for LASSO-selected features
 
 ## Discovery Dataset w/ Covariates
 expr_grady <- load_grady_expr()
