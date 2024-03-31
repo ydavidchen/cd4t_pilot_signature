@@ -4,6 +4,7 @@ rm(list=ls())
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 source("utils.R")
 library(pheatmap)
+library(tableone)
 
 CLUSTPARAM <- c("ward.D2", "euclidean")
 COEF_CUT <- 0.00125
@@ -67,6 +68,14 @@ ctab_grady <- table(
 ctab_grady <- ctab_grady[c(2,1), c(2,1)]
 ctab_grady
 
+## Summarize by cluster - reviewer request:
+t1_grady <- CreateTableOne(
+  vars = c("Age","Sex","BMI","RaceWhite"),
+  strata = "Cluster",
+  data = res_cl_grady
+)
+print(t1_grady, showAllLevels=TRUE)
+
 # -------------------------- Application Set --------------------------
 expr_hiv <- load_hiv_expr()
 covars_hiv <- load_hiv_covars()
@@ -109,6 +118,16 @@ cTabUnivar <- table(
 cTabUnivar <- cTabUnivar[c(2,1), c(2,1)]
 cTabUnivar
 fisher.test(cTabUnivar) 
+
+## Summarize by cluster - reviewer request:
+t1_h1v <- CreateTableOne(
+  c("Age","RaceWhite", "CD4_count_baseline", "CD4_count_week48", "PercChangeCD4"),
+  strata = "Cluster",
+  data = res_cl,
+  test = TRUE
+)
+
+print(t1_h1v, showAllLevels=TRUE)
 
 ## With covariate adjustment:
 mlr <- glm(
